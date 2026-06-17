@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risk Radar — AI Project Health Monitor</title>
+<style>
+  :root{
+    --bg:#0b0f1a; --panel:#121829; --panel2:#0e1322; --line:#1f2940;
+    --txt:#e8ecf6; --mut:#8b97b4; --mut2:#5d6885;
+    --grn:#28c389; --amb:#f5b23a; --red:#ff5d6b; --blu:#5b8cff; --pur:#a073ff;
+    --grn-bg:rgba(40,195,137,.12); --amb-bg:rgba(245,178,58,.13); --red-bg:rgba(255,93,107,.13);
+    --shadow:0 10px 40px rgba(0,0,0,.4);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(1200px 600px at 80% -10%,rgba(91,140,255,.10),transparent 60%),
+               radial-gradient(900px 500px at -10% 110%,rgba(160,115,255,.08),transparent 55%),
+               var(--bg);
+    color:var(--txt);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1240px;margin:0 auto;padding:28px 24px 80px}
+
+  /* Header */
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#5b8cff,#a073ff);
+        display:grid;place-items:center;box-shadow:0 6px 20px rgba(91,140,255,.45);position:relative;overflow:hidden}
+  .logo svg{width:26px;height:26px}
+  .brand h1{font-size:20px;font-weight:800;letter-spacing:-.02em}
+  .brand p{font-size:12.5px;color:var(--mut)}
+  .live{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mut);
+        background:var(--panel);border:1px solid var(--line);padding:8px 13px;border-radius:30px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 0 0 rgba(40,195,137,.6);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(40,195,137,.5)}70%{box-shadow:0 0 0 9px rgba(40,195,137,0)}100%{box-shadow:0 0 0 0 rgba(40,195,137,0)}}
+
+  /* Workflow strip */
+  .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:0;align-items:center;
+        background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+        padding:16px 20px;margin:22px 0 24px}
+  .step{display:flex;align-items:center;gap:12px}
+  .step .num{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+  .s1 .num{background:var(--blu);color:#fff} .s2 .num{background:var(--pur);color:#fff} .s3 .num{background:var(--grn);color:#062018}
+  .step b{font-size:13.5px;display:block} .step span{font-size:11.5px;color:var(--mut)}
+  .arrow{color:var(--mut2);padding:0 14px;font-size:18px}
+
+  /* Layout */
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}.flow{grid-template-columns:1fr;gap:14px}.arrow{display:none}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .card h2 .badge{margin-left:auto;font-size:11px;background:var(--panel2);border:1px solid var(--line);color:var(--mut);padding:2px 9px;border-radius:20px;letter-spacing:0;text-transform:none}
+
+  /* Input */
+  .src-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .src-tab{font-size:11px;padding:5px 10px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--mut);cursor:default;display:flex;align-items:center;gap:5px}
+  .src-tab i{width:6px;height:6px;border-radius:50%;background:var(--blu)}
+  textarea{width:100%;height:300px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+           color:var(--txt);padding:14px;font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12px;line-height:1.6;resize:vertical}
+  textarea:focus{outline:none;border-color:var(--blu)}
+  .btn{width:100%;margin-top:12px;padding:13px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;
+       background:linear-gradient(135deg,#5b8cff,#7a6dff);color:#fff;box-shadow:0 8px 24px rgba(91,140,255,.4);transition:transform .12s,filter .2s;display:flex;align-items:center;justify-content:center;gap:9px}
+  .btn:hover{filter:brightness(1.08)} .btn:active{transform:scale(.985)}
+  .btn:disabled{opacity:.6;cursor:wait}
+  .hint{font-size:11px;color:var(--mut2);margin-top:10px;text-align:center;line-height:1.5}
+  .hint a{color:var(--blu);text-decoration:none}
+
+  /* Output */
+  #out{display:flex;flex-direction:column;gap:20px;min-height:200px}
+  .empty{display:grid;place-items:center;height:420px;text-align:center;color:var(--mut2);gap:14px}
+  .empty svg{width:60px;height:60px;opacity:.35}
+
+  /* Health banner */
+  .health{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;padding:22px}
+  .gauge{position:relative;width:128px;height:128px;flex:none}
+  .gauge svg{transform:rotate(-90deg)}
+  .gauge .val{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+  .gauge .val b{font-size:30px;font-weight:800;line-height:1}
+  .gauge .val span{font-size:11px;color:var(--mut)}
+  .health-info h3{font-size:22px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+  .pill{font-size:12px;font-weight:700;padding:4px 12px;border-radius:30px}
+  .pill.green{background:var(--grn-bg);color:var(--grn)} .pill.amber{background:var(--amb-bg);color:var(--amb)} .pill.red{background:var(--red-bg);color:var(--red)}
+  .health-info p{color:var(--mut);font-size:13.5px;margin-top:7px;max-width:560px}
+  .trend{display:inline-flex;align-items:center;gap:6px;font-size:12px;margin-top:11px;padding:5px 11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--mut)}
+
+  /* Counts row */
+  .counts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .count{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 17px;display:flex;align-items:center;gap:13px}
+  .count .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex:none}
+  .count .ic.r{background:var(--red-bg)} .count .ic.d{background:var(--amb-bg)} .count .ic.b{background:rgba(91,140,255,.13)}
+  .count b{font-size:24px;font-weight:800;display:block;line-height:1}
+  .count span{font-size:12px;color:var(--mut)}
+
+  /* two-col */
+  .two{display:grid;grid-template-columns:1.15fr 1fr;gap:20px}
+  @media(max-width:780px){.two{grid-template-columns:1fr}.health{grid-template-columns:1fr;text-align:center;justify-items:center}.counts{grid-template-columns:1fr}}
+
+  /* radar chart */
+  .radar-wrap{display:grid;place-items:center;padding:6px 0}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:10px;justify-content:center}
+  .legend span{font-size:11.5px;color:var(--mut);display:flex;align-items:center;gap:6px}
+  .legend i{width:9px;height:9px;border-radius:3px;display:inline-block}
+
+  /* risk items */
+  .item{padding:13px 0;border-bottom:1px solid var(--line)}
+  .item:last-child{border-bottom:none;padding-bottom:0}
+  .item:first-child{padding-top:0}
+  .item .top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+  .sev{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.04em;flex:none}
+  .sev.high{background:var(--red-bg);color:var(--red)} .sev.med{background:var(--amb-bg);color:var(--amb)} .sev.low{background:var(--grn-bg);color:var(--grn)}
+  .item .ttl{font-size:13.5px;font-weight:600;flex:1}
+  .item .cat{font-size:10.5px;color:var(--mut2);background:var(--panel2);padding:2px 8px;border-radius:6px;border:1px solid var(--line)}
+  .item .desc{font-size:12.5px;color:var(--mut);margin-left:0}
+  .item .meta{display:flex;gap:14px;margin-top:6px;font-size:11px;color:var(--mut2)}
+  .item .meta b{color:var(--mut);font-weight:600}
+
+  .dep{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+  .dep:last-child{border-bottom:none} .dep:first-child{padding-top:0}
+  .dep .from,.dep .to{background:var(--panel2);border:1px solid var(--line);padding:3px 9px;border-radius:7px;font-weight:600;white-space:nowrap}
+  .dep .ar{color:var(--mut2)} .dep .st{margin-left:auto;font-size:10.5px;padding:2px 8px;border-radius:6px}
+  .dep .st.blocked{background:var(--red-bg);color:var(--red)} .dep .st.atrisk{background:var(--amb-bg);color:var(--amb)} .dep .st.ok{background:var(--grn-bg);color:var(--grn)}
+
+  .next{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .next:last-child{border-bottom:none} .next:first-child{padding-top:0}
+  .next .chk{width:22px;height:22px;border-radius:7px;border:1px solid var(--line);background:var(--panel2);display:grid;place-items:center;flex:none;font-size:11px;font-weight:800;color:var(--blu)}
+  .next .body{flex:1}
+  .next .body .t{font-size:13px;font-weight:600}
+  .next .body .o{font-size:11.5px;color:var(--mut2);margin-top:2px}
+  .next .pr{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;height:fit-content;flex:none}
+  .next .pr.p1{background:var(--red-bg);color:var(--red)} .next .pr.p2{background:var(--amb-bg);color:var(--amb)} .next .pr.p3{background:rgba(91,140,255,.13);color:var(--blu)}
+
+  /* prompt section */
+  .prompt-sec{margin-top:24px}
+  .prompt-head{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+  .prompt-head h2{flex:1;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+  .chev{transition:transform .25s;color:var(--mut)}
+  .prompt-sec.open .chev{transform:rotate(180deg)}
+  .prompt-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+  .prompt-sec.open .prompt-body{max-height:1400px}
+  pre{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:14px;
+      overflow-x:auto;font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12px;line-height:1.7;color:#c5d0ea;white-space:pre-wrap}
+  pre .k{color:#7aa2ff;font-weight:600} pre .c{color:#5d6885;font-style:italic} pre .s{color:#62d4a3}
+
+  /* spinner / processing */
+  .proc{display:grid;place-items:center;height:420px;gap:18px;text-align:center}
+  .spin{width:46px;height:46px;border:3px solid var(--line);border-top-color:var(--blu);border-radius:50%;animation:rot .8s linear infinite}
+  @keyframes rot{to{transform:rotate(360deg)}}
+  .proc .log{font-size:12.5px;color:var(--mut);font-family:'SF Mono',ui-monospace,monospace;min-height:20px}
+  .fade{animation:fade .5s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  footer{margin-top:40px;text-align:center;color:var(--mut2);font-size:11.5px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.5" opacity=".5"/><circle cx="12" cy="12" r="5" stroke="#fff" stroke-width="1.5" opacity=".7"/><circle cx="12" cy="12" r="1.6" fill="#fff"/><path d="M12 12L19 5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <h1>Risk Radar</h1>
+        <p>AI project-health monitor · flags risks, dependencies &amp; blockers early</p>
+      </div>
+    </div>
+    <div class="live"><span class="dot"></span> Monitoring · Project Atlas</div>
+  </header>
+
+  <!-- Workflow -->
+  <div class="flow">
+    <div class="step s1"><div class="num">1</div><div><b>Ingest updates</b><span>Standups · Slack · Jira · status emails</span></div></div>
+    <div class="arrow">→</div>
+    <div class="step s2"><div class="num">2</div><div><b>AI analysis</b><span>LLM extracts &amp; scores signals</span></div></div>
+    <div class="arrow">→</div>
+    <div class="step s3"><div class="num">3</div><div><b>Radar output</b><span>Health · risks · deps · next steps</span></div></div>
+  </div>
+
+  <div class="grid">
+    <!-- INPUT -->
+    <div class="card">
+      <h2>Raw project updates <span class="badge" id="srcCount">5 sources</span></h2>
+      <div class="src-tabs">
+        <div class="src-tab"><i></i>Standup</div>
+        <div class="src-tab"><i style="background:var(--pur)"></i>Slack</div>
+        <div class="src-tab"><i style="background:var(--grn)"></i>Jira</div>
+        <div class="src-tab"><i style="background:var(--amb)"></i>Email</div>
+        <div class="src-tab"><i style="background:var(--red)"></i>PR notes</div>
+      </div>
+      <textarea id="input" spellcheck="false"></textarea>
+      <button class="btn" id="run">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Run Risk Radar
+      </button>
+      <p class="hint">Edit the notes and re-run — the radar re-scores live.<br>Heuristic engine shown here mirrors the <a href="#prompt" onclick="openPrompt()">LLM prompt</a> used in production.</p>
+    </div>
+
+    <!-- OUTPUT -->
+    <div id="out">
+      <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M12 12l6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div><b style="color:var(--mut)">Radar idle</b><br>Hit <b style="color:var(--blu)">Run Risk Radar</b> to analyze the updates</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROMPT -->
+  <div class="prompt-sec card" id="prompt">
+    <div class="prompt-head" onclick="this.parentElement.classList.toggle('open')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M8 9h8M8 13h5" stroke="var(--pur)" stroke-width="1.6" stroke-linecap="round"/><rect x="3" y="4" width="18" height="16" rx="3" stroke="var(--pur)" stroke-width="1.5"/></svg>
+      <h2>The engineered prompt that powers it</h2>
+      <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="prompt-body">
+<pre><span class="c">SYSTEM</span>
+You are <span class="k">Risk Radar</span>, a project-delivery risk analyst. You read raw, messy
+updates from multiple sources (standups, Slack, Jira, emails) and surface
+delivery risk early — before it becomes a missed deadline.
+
+<span class="c"># Rules</span>
+- Be skeptical. Hedged language ("might slip", "still waiting", "unsure")
+  is an EARLY SIGNAL — weight it, don't dismiss it.
+- Separate three things: <span class="k">RISKS</span> (could go wrong), <span class="k">DEPENDENCIES</span> (X needs Y),
+  <span class="k">BLOCKERS</span> (work stopped right now).
+- Score each risk: severity (High/Med/Low) = impact × likelihood.
+- Never invent facts. If the notes don't say it, omit it.
+- Overall health: <span class="s">RED</span> if any active blocker or High risk on critical path;
+  <span class="s">AMBER</span> if Medium risks or slipping deps; <span class="s">GREEN</span> if on track.
+
+<span class="c"># Output — strict JSON</span>
+{
+  "health": { "status": "GREEN|AMBER|RED", "score": 0-100,
+              "rationale": "one line", "trend": "improving|stable|declining" },
+  "risks":        [{ "title", "category", "severity", "likelihood",
+                     "impact", "evidence", "source" }],
+  "dependencies": [{ "from", "to", "status": "ok|at-risk|blocked", "note" }],
+  "blockers":     [{ "title", "owner", "since", "evidence" }],
+  "next_steps":   [{ "action", "owner", "priority": "P1|P2|P3" }]
+}
+
+<span class="c">USER</span>
+Here are this week's raw updates for {{project}}:
+"""
+{{raw_updates}}
+"""
+Return only the JSON. Cite the source phrase as evidence for every item.</pre>
+    </div>
+  </div>
+
+  <footer>
+    Risk Radar · prototype for the AI Workflow challenge (#1 Risk Radar × #3 Status Summarizer)<br>
+    Dummy data — fictional "Project Atlas". Heuristic engine in-browser; production swaps in the Claude prompt above.
+  </footer>
+</div>
+
+<script>
+/* ---------- Dummy dataset: messy multi-source updates ---------- */
+const SAMPLE = `[STANDUP · Mon] Checkout API integration is basically done but QA hasn't
+started — still waiting on the staging env from DevOps, blocked since Thurs.
+Priya OOO this week so the payments piece is unowned right now.
+
+[SLACK #atlas-eng] "guys the new pricing service is returning 500s intermittently,
+not sure if it's us or the vendor. might need to roll back if not fixed by Wed" — Arjun
+
+[JIRA ATL-204] Design handoff for the address form slipped again, now 3 days late.
+Frontend can't start the form work until specs land. Depends on Design team.
+
+[EMAIL · PM weekly] Overall we're tracking to the June 30 launch but it's tight.
+Legal review of the new T&Cs hasn't been scheduled yet — flagging as a concern.
+Load testing still not done. Two engineers out next week.
+
+[PR NOTES] Merged the cart refactor 🎉 but test coverage dropped to 61%,
+a few flaky tests on payment retries. Tech debt piling up on the webhook handler.`;
+
+document.getElementById('input').value = SAMPLE;
+
+/* ---------- Heuristic risk engine (mirrors the LLM prompt logic) ---------- */
+const CATS = {
+  Technical:{c:'#5b8cff'}, Dependency:{c:'#f5b23a'}, Resourcing:{c:'#a073ff'},
+  Quality:{c:'#28c389'}, Schedule:{c:'#ff5d6b'}, Compliance:{c:'#ff8f5d'}
+};
+
+function analyze(text){
+  const lines = text.split(/\n/).map(l=>l.trim()).filter(Boolean);
+  const blob = text.toLowerCase();
+  const risks=[], deps=[], blockers=[], next=[];
+  const catScore={Technical:0,Dependency:0,Resourcing:0,Quality:0,Schedule:0,Compliance:0};
+
+  const has = (...w)=>w.some(x=>blob.includes(x));
+  const find = (...w)=>{ for(const l of lines){ const ll=l.toLowerCase(); if(w.some(x=>ll.includes(x))) return l.replace(/^\[[^\]]*\]\s*/,''); } return ''; };
+
+  // BLOCKERS
+  if(has('blocked','blocked since','still waiting on the staging','can\'t start','can’t start','cant start')){
+    blockers.push({title:'QA blocked — staging env not provisioned',owner:'DevOps',since:'Thu',evidence:'“still waiting on the staging env … blocked since Thurs”'});
+    catScore.Dependency+=2; catScore.Schedule+=1;
+  }
+  if(has('500s','rolling back','roll back','returning 500')){
+    blockers.push({title:'Pricing service throwing intermittent 500s',owner:'Arjun',since:'Mon',evidence:'“new pricing service is returning 500s intermittently … might need to roll back”'});
+    catScore.Technical+=3;
+  }
+
+  // RISKS
+  if(has('500s','intermittent','flaky','rollback','roll back'))
+    risks.push({title:'Pricing service instability may force a rollback',cat:'Technical',sev:'high',like:'Medium',impact:'Launch-blocking',evidence:'“returning 500s … might need to roll back if not fixed by Wed”',src:'Slack'});
+  if(has('slipped','late','depends on design','handoff'))
+    risks.push({title:'Address-form design handoff slipped 3 days — FE idle',cat:'Dependency',sev:'high',like:'High',impact:'Delays frontend',evidence:'“Design handoff … now 3 days late … Frontend can’t start”',src:'Jira'});
+  if(has('legal','t&cs','t&c','compliance','review'))
+    risks.push({title:'Legal review of new T&Cs not yet scheduled',cat:'Compliance',sev:'med',like:'Medium',impact:'Could block launch',evidence:'“Legal review of the new T&Cs hasn’t been scheduled”',src:'Email'});
+  if(has('load test','load testing','performance'))
+    risks.push({title:'Load testing not started before launch',cat:'Quality',sev:'med',like:'High',impact:'Unknown scale readiness',evidence:'“Load testing still not done”',src:'Email'});
+  if(has('coverage','flaky','tech debt','test coverage'))
+    risks.push({title:'Test coverage dropped to 61% + flaky payment tests',cat:'Quality',sev:'med',like:'Medium',impact:'Regression risk',evidence:'“coverage dropped to 61% … flaky tests on payment retries”',src:'PR notes'});
+  if(has('ooo','out next week','out this week','unowned','two engineers out'))
+    risks.push({title:'Key staff out — payments work unowned',cat:'Resourcing',sev:'high',like:'High',impact:'Critical-path gap',evidence:'“Priya OOO … payments piece is unowned” · “Two engineers out next week”',src:'Standup'});
+  if(has('tight','it\'s tight','its tight','tracking to'))
+    risks.push({title:'June 30 launch date is tight with open workstreams',cat:'Schedule',sev:'med',like:'Medium',impact:'Date risk',evidence:'“tracking to the June 30 launch but it’s tight”',src:'Email'});
+
+  // score categories from risks
+  risks.forEach(r=>{ catScore[r.cat]+= r.sev==='high'?3:r.sev==='med'?2:1; });
+
+  // DEPENDENCIES
+  if(has('staging','devops')) deps.push({from:'QA',to:'DevOps',status:'blocked',note:'Needs staging env'});
+  if(has('handoff','design')) deps.push({from:'Frontend',to:'Design',status:'blocked',note:'Address-form specs late'});
+  if(has('vendor','pricing service')) deps.push({from:'Checkout',to:'Pricing vendor',status:'at-risk',note:'Intermittent 500s'});
+  if(has('legal','t&c')) deps.push({from:'Launch',to:'Legal',status:'at-risk',note:'T&C review unscheduled'});
+  if(has('payments','priya')) deps.push({from:'Payments',to:'Priya (owner)',status:'at-risk',note:'Owner OOO'});
+
+  // NEXT STEPS
+  if(has('staging')) next.push({a:'Escalate staging env provisioning to unblock QA',o:'DevOps lead',pr:'p1'});
+  if(has('500s')) next.push({a:'Triage pricing 500s with vendor; set Wed rollback go/no-go',o:'Arjun',pr:'p1'});
+  if(has('handoff','design')) next.push({a:'Get address-form specs delivered today; FE is idle',o:'Design + PM',pr:'p1'});
+  if(has('priya','unowned')) next.push({a:'Assign interim owner for payments while Priya is OOO',o:'Eng manager',pr:'p2'});
+  if(has('legal')) next.push({a:'Schedule legal T&C review this week',o:'PM',pr:'p2'});
+  if(has('load test')) next.push({a:'Book load-testing window before code freeze',o:'QA',pr:'p2'});
+  if(has('coverage','flaky')) next.push({a:'Stabilize flaky payment tests; restore coverage gate',o:'Eng',pr:'p3'});
+
+  // HEALTH
+  const highCount = risks.filter(r=>r.sev==='high').length;
+  let status,score,trend,rationale;
+  if(blockers.length>0 || highCount>=2){ status='RED'; score=Math.max(34,58-highCount*6-blockers.length*4);
+    rationale=`${blockers.length} active blocker(s) and ${highCount} high-severity risk(s) on the critical path.`; trend='declining'; }
+  else if(risks.length>0){ status='AMBER'; score=68-risks.length*2;
+    rationale=`${risks.length} open risk(s); deliverable but needs attention this week.`; trend='stable'; }
+  else { status='GREEN'; score=88; rationale='No active blockers or high risks detected.'; trend='improving'; }
+  score=Math.max(20,Math.min(95,score));
+
+  return {health:{status,score,trend,rationale},risks,deps,blockers,next,catScore};
+}
+
+/* ---------- Render ---------- */
+const out = document.getElementById('out');
+const sevOrder={high:0,med:1,low:2};
+
+function radarSVG(catScore){
+  const cats=Object.keys(catScore);
+  const max=Math.max(3,...Object.values(catScore));
+  const cx=130,cy=125,R=92,n=cats.length;
+  const pt=(i,r)=>{const a=-Math.PI/2 + i*2*Math.PI/n; return [cx+r*Math.cos(a),cy+r*Math.sin(a)];};
+  let rings=''; [0.33,0.66,1].forEach(f=>{ let p=cats.map((_,i)=>pt(i,R*f).join(',')).join(' '); rings+=`<polygon points="${p}" fill="none" stroke="#1f2940" stroke-width="1"/>`; });
+  let spokes='',labels='';
+  cats.forEach((c,i)=>{ const [x,y]=pt(i,R); spokes+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#1f2940" stroke-width="1"/>`;
+    const [lx,ly]=pt(i,R+16); const anchor= Math.abs(lx-cx)<6?'middle':(lx>cx?'start':'end');
+    labels+=`<text x="${lx}" y="${ly+3}" fill="#8b97b4" font-size="10.5" text-anchor="${anchor}">${c}</text>`;
+    labels+=`<circle cx="${pt(i,R*(catScore[c]/max)||0)[0]}" cy="${pt(i,R*(catScore[c]/max)||0)[1]}" r="3" fill="${CATS[c].c}"/>`; });
+  const poly=cats.map((c,i)=>pt(i,R*(catScore[c]/max)).join(',')).join(' ');
+  return `<svg width="300" height="260" viewBox="-35 0 330 260">${rings}${spokes}
+    <polygon points="${poly}" fill="rgba(91,140,255,.22)" stroke="#5b8cff" stroke-width="2"/>${labels}</svg>`;
+}
+
+function gauge(score,color){
+  const r=54,c=2*Math.PI*r,off=c*(1-score/100);
+  return `<div class="gauge"><svg width="128" height="128">
+    <circle cx="64" cy="64" r="${r}" fill="none" stroke="#1f2940" stroke-width="11"/>
+    <circle cx="64" cy="64" r="${r}" fill="none" stroke="${color}" stroke-width="11" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${c}" style="transition:stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1)"
+      data-off="${off}"/></svg>
+    <div class="val"><b style="color:${color}">${score}</b><span>health</span></div></div>`;
+}
+
+function render(R){
+  const cl = R.health.status==='RED'?'red':R.health.status==='AMBER'?'amber':'green';
+  const col = R.health.status==='RED'?'#ff5d6b':R.health.status==='AMBER'?'#f5b23a':'#28c389';
+  const trendIcon = R.health.trend==='declining'?'↓':R.health.trend==='improving'?'↑':'→';
+  const sorted=[...R.risks].sort((a,b)=>sevOrder[a.sev]-sevOrder[b.sev]);
+
+  out.innerHTML = `
+  <div class="card health fade">
+    ${gauge(R.health.score,col)}
+    <div class="health-info">
+      <h3>Project Atlas <span class="pill ${cl}">${R.health.status}</span></h3>
+      <p>${R.health.rationale}</p>
+      <span class="trend">Trend: <b style="color:${col}">${trendIcon} ${R.health.trend}</b> · vs. last week</span>
+    </div>
+  </div>
+
+  <div class="counts fade">
+    <div class="count"><div class="ic r">🚨</div><div><b style="color:var(--red)">${R.risks.length}</b><span>open risks</span></div></div>
+    <div class="count"><div class="ic d">🔗</div><div><b style="color:var(--amb)">${R.deps.length}</b><span>dependencies</span></div></div>
+    <div class="count"><div class="ic b">⛔</div><div><b style="color:var(--blu)">${R.blockers.length}</b><span>active blockers</span></div></div>
+  </div>
+
+  <div class="two">
+    <div class="card fade">
+      <h2>Risk register <span class="badge">${R.risks.length} flagged · by severity</span></h2>
+      ${sorted.map(r=>`<div class="item">
+        <div class="top"><span class="sev ${r.sev}">${r.sev.toUpperCase()}</span><span class="ttl">${r.title}</span><span class="cat">${r.cat}</span></div>
+        <div class="meta"><span>Likelihood: <b>${r.like}</b></span><span>Impact: <b>${r.impact}</b></span><span>Source: <b>${r.src}</b></span></div>
+        <div class="desc" style="margin-top:6px">${r.evidence}</div>
+      </div>`).join('')||'<p style="color:var(--mut2);font-size:13px">No risks detected.</p>'}
+    </div>
+    <div class="card fade">
+      <h2>Risk surface</h2>
+      <div class="radar-wrap">${radarSVG(R.catScore)}</div>
+      <div class="legend">${Object.keys(CATS).map(c=>`<span><i style="background:${CATS[c].c}"></i>${c}</span>`).join('')}</div>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="card fade">
+      <h2>Dependencies <span class="badge">cross-team</span></h2>
+      ${R.deps.map(d=>`<div class="dep"><span class="from">${d.from}</span><span class="ar">→</span><span class="to">${d.to}</span>
+        <span class="st ${d.status==='blocked'?'blocked':d.status==='at-risk'?'atrisk':'ok'}">${d.status}</span></div>
+        <div style="font-size:11px;color:var(--mut2);margin:-4px 0 4px 2px">${d.note}</div>`).join('')||'<p style="color:var(--mut2);font-size:13px">None.</p>'}
+    </div>
+    <div class="card fade">
+      <h2>Active blockers <span class="badge">work stopped now</span></h2>
+      ${R.blockers.map(b=>`<div class="item">
+        <div class="top"><span class="sev high">BLOCKED</span><span class="ttl">${b.title}</span></div>
+        <div class="meta"><span>Owner: <b>${b.owner}</b></span><span>Since: <b>${b.since}</b></span></div>
+        <div class="desc" style="margin-top:6px">${b.evidence}</div></div>`).join('')||'<p style="color:var(--mut2);font-size:13px">No active blockers 🎉</p>'}
+    </div>
+  </div>
+
+  <div class="card fade">
+    <h2>Recommended next steps <span class="badge">prioritized</span></h2>
+    ${R.next.map((s,i)=>`<div class="next"><div class="chk">${i+1}</div>
+      <div class="body"><div class="t">${s.a}</div><div class="o">Owner: ${s.o}</div></div>
+      <span class="pr ${s.pr}">${s.pr.toUpperCase()}</span></div>`).join('')}
+  </div>`;
+
+  // animate gauge
+  requestAnimationFrame(()=>{ const g=out.querySelector('[data-off]'); if(g) g.style.strokeDashoffset=g.dataset.off; });
+}
+
+/* ---------- Run with processing animation ---------- */
+const btn=document.getElementById('run');
+const LOGS=['Ingesting 5 sources…','Tokenizing updates…','Extracting risk signals…','Scoring severity × likelihood…','Mapping dependencies…','Composing radar…'];
+btn.onclick=()=>{
+  const text=document.getElementById('input').value;
+  btn.disabled=true;
+  out.innerHTML=`<div class="card proc"><div class="spin"></div><div class="log" id="plog">Starting…</div></div>`;
+  let i=0; const plog=document.getElementById('plog');
+  const iv=setInterval(()=>{ plog.textContent=LOGS[i]||'Done'; i++;
+    if(i>LOGS.length){ clearInterval(iv); render(analyze(text)); btn.disabled=false; } },330);
+};
+function openPrompt(){ document.getElementById('prompt').classList.add('open'); }
+
+// auto-run once on load for instant demo
+window.addEventListener('load',()=>setTimeout(()=>btn.click(),400));
+</script>
+</body>
+</html>

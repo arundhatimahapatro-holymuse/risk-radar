@@ -6,6 +6,7 @@
 > next steps).
 
 **🔗 Live demo:** https://arundhatimahapatro-holymuse.github.io/risk-radar/risk-radar.html
+**📄 PDF:** https://arundhatimahapatro-holymuse.github.io/risk-radar/Risk-Radar-Submission.pdf
 **📦 Repo:** https://github.com/arundhatimahapatro-holymuse/risk-radar
 
 ![Risk Radar dashboard](./screenshot.png)

@@ -11,6 +11,9 @@ Live demo (open in a browser — interactive dashboard):
   https://arundhatimahapatro-holymuse.github.io/risk-radar/risk-radar.html
   (GitHub Pages may take 1–2 minutes to go live after first push.)
 
+One-page PDF (summary + screenshot + prompt):
+  https://arundhatimahapatro-holymuse.github.io/risk-radar/Risk-Radar-Submission.pdf
+
 Run locally instead:
   open risk-radar.html        (no build step, no API key needed)
 

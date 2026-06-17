@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Risk Radar — Submission</title>
+<style>
+  @page{ size:A4; margin:14mm 15mm; }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  :root{--ink:#16203a;--mut:#5b6788;--line:#e2e7f2;--blu:#3b6cff;--pur:#7a5bff;--red:#e2483f;--amb:#d98b1f;--grn:#1f9d6b;--bg:#f6f8fd}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;color:var(--ink);font-size:11px;line-height:1.5}
+  .page{padding:0}
+
+  /* header band */
+  .hero{background:linear-gradient(120deg,#2a3a86,#5b3bff 60%,#7a5bff);color:#fff;border-radius:14px;padding:20px 22px;display:flex;align-items:center;gap:16px;margin-bottom:16px}
+  .logo{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.16);display:grid;place-items:center;flex:none}
+  .logo svg{width:28px;height:28px}
+  .hero h1{font-size:23px;font-weight:800;letter-spacing:-.02em}
+  .hero p{font-size:11.5px;opacity:.9;margin-top:2px}
+  .hero .tag{margin-left:auto;text-align:right;font-size:10px;opacity:.92;line-height:1.7}
+  .hero .tag b{display:inline-block;background:rgba(255,255,255,.18);padding:2px 9px;border-radius:20px;font-weight:700}
+
+  .links{display:flex;gap:10px;margin-bottom:16px}
+  .lk{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px 13px;background:#fff}
+  .lk .l{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);font-weight:700;margin-bottom:3px}
+  .lk a{font-size:10px;color:var(--blu);text-decoration:none;word-break:break-all;font-weight:600}
+
+  .row{display:flex;gap:16px;margin-bottom:15px}
+  .col{flex:1}
+  h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+  h2::before{content:"";width:4px;height:13px;border-radius:3px;background:var(--blu);display:inline-block}
+  .h-pur::before{background:var(--pur)} .h-grn::before{background:var(--grn)} .h-amb::before{background:var(--amb)}
+
+  .summary{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px 15px;font-size:11px;line-height:1.6}
+  .summary b{color:var(--ink)}
+
+  .shot{width:100%;border:1px solid var(--line);border-radius:10px;display:block}
+  .cap{font-size:8.5px;color:var(--mut);text-align:center;margin-top:5px}
+
+  table{width:100%;border-collapse:collapse;font-size:10px}
+  td{padding:5px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+  td.k{color:var(--mut);font-weight:700;width:78px}
+
+  .three{display:flex;gap:10px}
+  .card{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:#fff}
+  .card .t{font-size:10px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+  .pip{width:8px;height:8px;border-radius:3px;display:inline-block}
+  .card p{font-size:9.5px;color:var(--mut);line-height:1.5}
+
+  .pillrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+  .pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px}
+  .red{background:#fdecea;color:var(--red)} .amb{background:#fdf3e2;color:var(--amb)} .grn{background:#e7f6ef;color:var(--grn)} .blu{background:#eaf0ff;color:var(--blu)}
+
+  pre{background:#0e1322;color:#c5d0ea;border-radius:10px;padding:13px 14px;font-family:'SF Mono',Menlo,monospace;font-size:8.6px;line-height:1.65;white-space:pre-wrap;overflow:hidden}
+  pre .c{color:#6b779b} pre .k{color:#7aa2ff} pre .s{color:#62d4a3}
+
+  .foot{margin-top:14px;border-top:1px solid var(--line);padding-top:9px;font-size:8.5px;color:var(--mut);display:flex;justify-content:space-between}
+  .avoid{page-break-inside:avoid}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero avoid">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.5" opacity=".5"/><circle cx="12" cy="12" r="5" stroke="#fff" stroke-width="1.5" opacity=".75"/><circle cx="12" cy="12" r="1.6" fill="#fff"/><path d="M12 12L19 5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    <div>
+      <h1>Risk Radar</h1>
+      <p>AI project-health monitor — flags risks, dependencies &amp; blockers early</p>
+    </div>
+    <div class="tag"><b>Challenge #1 × #3</b><br>Risk Radar × Status Summarizer<br>Dummy data · "Project Atlas"</div>
+  </div>
+
+  <div class="links avoid">
+    <div class="lk"><div class="l">🔗 Live demo (interactive)</div><a href="https://arundhatimahapatro-holymuse.github.io/risk-radar/risk-radar.html">arundhatimahapatro-holymuse.github.io/risk-radar/risk-radar.html</a></div>
+    <div class="lk"><div class="l">📦 Public repository</div><a href="https://github.com/arundhatimahapatro-holymuse/risk-radar">github.com/arundhatimahapatro-holymuse/risk-radar</a></div>
+  </div>
+
+  <div class="avoid" style="margin-bottom:15px">
+    <h2>100-word summary</h2>
+    <div class="summary"><b>Risk Radar</b> ingests messy, multi-source project updates — standups, Slack, Jira, status emails, PR notes — and turns them into an early-warning dashboard. A single engineered Claude prompt extracts and <i>separates</i> three things teams constantly conflate: <b>risks</b> (could go wrong), <b>dependencies</b> (X waits on Y), and <b>blockers</b> (stopped now), scoring each by impact × likelihood and citing the exact source phrase as evidence. It outputs strict JSON — overall RED/AMBER/GREEN health, a risk register, a cross-team dependency map, and prioritized next steps — that renders live in the dashboard. The browser prototype runs a heuristic mirror of the prompt, so it demos instantly with no API key.</div>
+  </div>
+
+  <div class="avoid" style="margin-bottom:15px">
+    <h2 class="h-grn">The prototype</h2>
+    <img class="shot" src="hero-crop.png" alt="Risk Radar dashboard">
+    <div class="cap">Live dashboard reading the "Project Atlas" updates → RED health 34/100, 2 blockers, 7 risks, 5 dependencies, a category risk-surface radar, and prioritized next steps.</div>
+  </div>
+
+  <div class="row avoid" style="margin-bottom:15px">
+    <div class="col" style="flex:1.1">
+      <h2 class="h-amb">How the workflow runs</h2>
+      <table>
+        <tr><td class="k">1 · Ingest</td><td>Pull last-24h updates from connectors (Slack, Jira, email, standup bot).</td></tr>
+        <tr><td class="k">2 · Analyze</td><td>Feed raw text to the Risk Radar Claude prompt → strict JSON.</td></tr>
+        <tr><td class="k">3 · Radar</td><td>Render dashboard, push a digest that @mentions owners of RED items, log score for week-over-week trend.</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <h2>What it separates</h2>
+      <div class="three" style="gap:7px">
+        <div class="card"><div class="t"><span class="pip" style="background:var(--red)"></span>Risk</div><p>Could go wrong. Scored impact × likelihood.</p></div>
+        <div class="card"><div class="t"><span class="pip" style="background:var(--amb)"></span>Dependency</div><p>X waits on Y — a cross-team handoff.</p></div>
+        <div class="card"><div class="t"><span class="pip" style="background:var(--blu)"></span>Blocker</div><p>Work stopped right now.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="avoid">
+    <h2 class="h-pur">The engineered prompt (excerpt)</h2>
+<pre><span class="c"># SYSTEM — Risk Radar, a project-delivery risk analyst</span>
+- Be skeptical. Hedged language ("might slip", "still waiting") is an EARLY SIGNAL.
+- Separate <span class="k">RISKS</span> (could go wrong) · <span class="k">DEPENDENCIES</span> (X needs Y) · <span class="k">BLOCKERS</span> (stopped now).
+- Score every risk: severity = impact × likelihood (High / Med / Low).
+- Cite the exact source phrase as `evidence` for every item. Never invent facts.
+- Health: <span class="s">RED</span> if any active blocker or High risk on critical path; <span class="s">AMBER</span> if medium; <span class="s">GREEN</span> if on track.
+
+<span class="c"># OUTPUT — strict JSON</span>
+{ "health": {status, score, rationale, trend},
+  "risks": [{title, category, severity, likelihood, impact, evidence, source}],
+  "dependencies": [{from, to, status, note}],
+  "blockers": [{title, owner, since, evidence}],
+  "next_steps": [{action, owner, priority}] }</pre>
+    <div class="pillrow">
+      <span class="pill grn">Role + mission: "surface risk early"</span>
+      <span class="pill amb">Hedged language = signal</span>
+      <span class="pill red">severity = impact × likelihood</span>
+      <span class="pill blu">evidence = exact source phrase (anti-hallucination)</span>
+      <span class="pill grn">deterministic RED/AMBER/GREEN rules</span>
+      <span class="pill blu">strict JSON → dashboard / Slack digest</span>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>Risk Radar · AI Workflow challenge submission · self-created dummy data, no confidential information.</span>
+    <span>Prototype: single-file HTML · Production: swap heuristic for Claude (Opus 4.8) prompt.</span>
+  </div>
+
+</div>
+</body>
+</html>

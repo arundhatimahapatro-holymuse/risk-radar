@@ -5,6 +5,9 @@
 > and blockers early** — and rolls them into a clear status (health, risks,
 > next steps).
 
+**🔗 Live demo:** https://arundhatimahapatro-holymuse.github.io/risk-radar/risk-radar.html
+**📦 Repo:** https://github.com/arundhatimahapatro-holymuse/risk-radar
+
 ![Risk Radar dashboard](./screenshot.png)
 
 ---

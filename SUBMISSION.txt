@@ -1,0 +1,39 @@
+RISK RADAR — AI Project-Health Monitor
+Challenge attempted: #1 Risk Radar  ×  #3 Status Summarizer (hybrid)
+========================================================================
+
+PUBLIC LINKS
+------------
+Repository (source + prompt + dataset):
+  https://github.com/arundhatimahapatro-holymuse/risk-radar
+
+Live demo (open in a browser — interactive dashboard):
+  https://arundhatimahapatro-holymuse.github.io/risk-radar/risk-radar.html
+  (GitHub Pages may take 1–2 minutes to go live after first push.)
+
+Run locally instead:
+  open risk-radar.html        (no build step, no API key needed)
+
+
+WHAT'S INSIDE
+-------------
+  risk-radar.html          The prototype — single-file interactive dashboard
+  RISK_RADAR_PROMPT.md     The engineered LLM prompt + schema + worked example
+  dummy-data.md            Self-created fictional "Project Atlas" dataset
+  README.md                100-word summary + how it works
+  screenshot.png           Full-page render of the dashboard
+
+
+100-WORD SUMMARY
+----------------
+Risk Radar ingests messy, multi-source project updates — standups, Slack, Jira,
+status emails, PR notes — and turns them into an early-warning dashboard. A single
+engineered Claude prompt extracts and separates three things teams constantly
+conflate: risks (could go wrong), dependencies (X waits on Y), and blockers
+(stopped now), scoring each by impact x likelihood and citing the exact source
+phrase as evidence. It outputs strict JSON — overall RED/AMBER/GREEN health, a
+risk register, a cross-team dependency map, and prioritized next steps — that
+renders live in the dashboard. The browser prototype runs a heuristic mirror of
+the prompt, so it demos instantly with no API key.
+
+Data: self-created dummy data only ("Project Atlas"). No confidential information.
